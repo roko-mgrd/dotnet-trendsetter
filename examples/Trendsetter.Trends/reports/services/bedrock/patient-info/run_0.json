@@ -1,0 +1,41 @@
+{
+  "test_id": "services.bedrock.patient-info",
+  "run_number": 0,
+  "timestamp": "2026-03-21T15:47:29.0366511+00:00",
+  "score": 1,
+  "items": [
+    {
+      "score": 1,
+      "field_scores": [
+        {
+          "field_name": "FullName",
+          "score": 1,
+          "mode": 1,
+          "expected": "\u0022John Michael Doe\u0022",
+          "actual": "\u0022John Michael Doe\u0022"
+        },
+        {
+          "field_name": "DateOfBirth",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u00221985-06-12\u0022",
+          "actual": "\u00221985-06-12\u0022"
+        },
+        {
+          "field_name": "Gender",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022Male\u0022",
+          "actual": "\u0022Male\u0022"
+        },
+        {
+          "field_name": "MemberId",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022MBR-2024-98765\u0022",
+          "actual": "\u0022MBR-2024-98765\u0022"
+        }
+      ]
+    }
+  ]
+}

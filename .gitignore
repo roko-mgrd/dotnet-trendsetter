@@ -1,0 +1,105 @@
+## .NET / Visual Studio
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+out/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Test results
+[Tt]est[Rr]esults/
+*.trx
+coverage/
+coverage.*.xml
+*.coverage
+*.coveragexml
+TestResult.xml
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+NuGetScratch
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Certificates & secrets
+*.crt
+*.pem
+*.der
+*.key
+*.cnf
+*.pfx
+*.p12
+secrets.json
+
+# Azure
+.azure/
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+
+# VS Code Extension
+.vscode
+vscode-extension/node_modules/
+vscode-extension/out/

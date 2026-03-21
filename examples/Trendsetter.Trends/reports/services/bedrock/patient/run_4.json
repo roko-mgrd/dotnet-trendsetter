@@ -1,0 +1,258 @@
+{
+  "test_id": "services.bedrock.patient",
+  "run_number": 4,
+  "timestamp": "2026-03-22T15:50:37.9036098+00:00",
+  "score": 0.9781735505873436,
+  "items": [
+    {
+      "score": 0.9781735505873436,
+      "field_scores": [
+        {
+          "field_name": "PatientInfo.FullName",
+          "score": 1,
+          "mode": 1,
+          "expected": "\u0022John Michael Doe\u0022",
+          "actual": "\u0022John Michael Doe\u0022"
+        },
+        {
+          "field_name": "PatientInfo.DateOfBirth",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u00221985-06-12\u0022",
+          "actual": "\u00221985-06-12\u0022"
+        },
+        {
+          "field_name": "PatientInfo.Gender",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022Male\u0022",
+          "actual": "\u0022Male\u0022"
+        },
+        {
+          "field_name": "PatientInfo.MemberId",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022MBR-2024-98765\u0022",
+          "actual": "\u0022MBR-2024-98765\u0022"
+        },
+        {
+          "field_name": "Insurance.PayerName",
+          "score": 1,
+          "mode": 1,
+          "expected": "\u0022Blue Cross Blue Shield\u0022",
+          "actual": "\u0022Blue Cross Blue Shield\u0022"
+        },
+        {
+          "field_name": "Insurance.PlanType",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022PPO\u0022",
+          "actual": "\u0022PPO\u0022"
+        },
+        {
+          "field_name": "Insurance.GroupNumber",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022GRP-445566\u0022",
+          "actual": "\u0022GRP-445566\u0022"
+        },
+        {
+          "field_name": "Procedures[].Name",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022Rotator cuff repair\u0022",
+          "actual": "\u0022Rotator cuff repair\u0022"
+        },
+        {
+          "field_name": "Procedures[].ShortDescription",
+          "score": 0.6206896551724138,
+          "mode": 2,
+          "expected": "\u0022Surgical repair of torn rotator cuff tendon using arthroscopic technique\u0022",
+          "actual": "\u0022Surgical repair of torn rotator cuff tendon using arthroscopic technique. The patient presented with chronic right shoulder pain.\u0022"
+        },
+        {
+          "field_name": "Procedures[].DateOfTreatment",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u00222024-03-15\u0022",
+          "actual": "\u00222024-03-15\u0022"
+        },
+        {
+          "field_name": "Procedures[].ProviderName",
+          "score": 1,
+          "mode": 1,
+          "expected": "\u0022Dr. Sarah Smith\u0022",
+          "actual": "\u0022Dr. Sarah Smith\u0022"
+        },
+        {
+          "field_name": "Procedures[].Diagnoses[].Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022M75.110\u0022",
+          "actual": "\u0022M75.110\u0022"
+        },
+        {
+          "field_name": "Procedures[].Diagnoses[].Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Rotator cuff tear or rupture of right shoulder\u0022",
+          "actual": "\u0022Rotator cuff tear or rupture of right shoulder\u0022"
+        },
+        {
+          "field_name": "Procedures[].Diagnoses[].Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022M75.100\u0022",
+          "actual": "\u0022M75.100\u0022"
+        },
+        {
+          "field_name": "Procedures[].Diagnoses[].Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Rotator cuff syndrome of right shoulder\u0022",
+          "actual": "\u0022Rotator cuff syndrome of right shoulder\u0022"
+        },
+        {
+          "field_name": "Procedures[].Name",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022Physical therapy evaluation\u0022",
+          "actual": "\u0022Physical therapy evaluation\u0022"
+        },
+        {
+          "field_name": "Procedures[].ShortDescription",
+          "score": 0.6153846153846153,
+          "mode": 2,
+          "expected": "\u0022Comprehensive PT evaluation for post-operative rotator cuff rehabilitation\u0022",
+          "actual": "\u0022Comprehensive PT evaluation for post-operative rotator cuff rehabilitation. Range of motion and strength assessment performed.\u0022"
+        },
+        {
+          "field_name": "Procedures[].DateOfTreatment",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u00222024-05-22\u0022",
+          "actual": "\u00222024-05-22\u0022"
+        },
+        {
+          "field_name": "Procedures[].ProviderName",
+          "score": 1,
+          "mode": 1,
+          "expected": "\u0022Dr. James Wilson\u0022",
+          "actual": "\u0022Dr. James Wilson\u0022"
+        },
+        {
+          "field_name": "Procedures[].Diagnoses[].Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022Z96.611\u0022",
+          "actual": "\u0022Z96.611\u0022"
+        },
+        {
+          "field_name": "Procedures[].Diagnoses[].Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Presence of right artificial shoulder joint\u0022",
+          "actual": "\u0022Presence of right artificial shoulder joint\u0022"
+        },
+        {
+          "field_name": "Procedures[].Diagnoses[].Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022M25.511\u0022",
+          "actual": "\u0022M25.511\u0022"
+        },
+        {
+          "field_name": "Procedures[].Diagnoses[].Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Pain in right shoulder\u0022",
+          "actual": "\u0022Pain in right shoulder\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022M75.110\u0022",
+          "actual": "\u0022M75.110\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Rotator cuff tear or rupture of right shoulder\u0022",
+          "actual": "\u0022Rotator cuff tear or rupture of right shoulder\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022M75.100\u0022",
+          "actual": "\u0022M75.100\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Rotator cuff syndrome of right shoulder\u0022",
+          "actual": "\u0022Rotator cuff syndrome of right shoulder\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022Z96.611\u0022",
+          "actual": "\u0022Z96.611\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Presence of right artificial shoulder joint\u0022",
+          "actual": "\u0022Presence of right artificial shoulder joint\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022M25.511\u0022",
+          "actual": "\u0022M25.511\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Pain in right shoulder\u0022",
+          "actual": "\u0022Pain in right shoulder\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022E11.9\u0022",
+          "actual": "\u0022E11.9\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Type 2 diabetes mellitus without complications\u0022",
+          "actual": "\u0022Type 2 diabetes mellitus without complications\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022I10\u0022",
+          "actual": "\u0022I10\u0022"
+        },
+        {
+          "field_name": "Diagnoses[].Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Essential hypertension\u0022",
+          "actual": "\u0022Essential hypertension\u0022"
+        }
+      ]
+    }
+  ]
+}
