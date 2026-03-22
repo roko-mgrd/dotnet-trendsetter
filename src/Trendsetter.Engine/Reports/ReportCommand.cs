@@ -31,7 +31,7 @@ public static class ReportCommand
             return;
         }
 
-        var command = args[0].ToLowerInvariant();
+        var command = args[0].ToLowerInvariant().TrimStart('-');
 
         if (command == "dashboard")
         {

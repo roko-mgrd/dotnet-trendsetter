@@ -141,7 +141,15 @@
       ]
     },
     "configuration": {
-      "title": "Trendsetter"
+      "title": "Trendsetter",
+      "properties": {
+        "trendsetter.concurrency": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1,
+          "description": "Maximum number of trend tests to run in parallel."
+        }
+      }
     }
   },
   "scripts": {

@@ -1,11 +1,10 @@
 namespace Trendsetter.Engine.Reports;
 
-using System.Text.Json;
 using Trendsetter.Engine.Models;
 
 /// <summary>
 /// CLI-friendly runner for trend tests.
-/// Handles running tests, saving results, and delegating to <see cref="ReportCommand"/>.
+/// Thin wrapper around <see cref="TrendRunner"/> that adds console output.
 ///
 /// Usage:
 ///   RunCommand.RunAsync(args, tests, "reports/")
@@ -13,33 +12,41 @@ using Trendsetter.Engine.Models;
 /// Commands:
 ///   (no args)                     → run all tests
 ///   --test &lt;testId&gt;              → run a single test by ID
+///   --concurrency &lt;n&gt;            → run up to n tests in parallel
 ///
 /// After running, remaining args are forwarded to <see cref="ReportCommand"/>.
 /// </summary>
 public static class RunCommand
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-    };
-
-    /// <summary>
-    /// A registered test: its ID and a delegate that runs it given optional history.
-    /// </summary>
-    public readonly record struct TestEntry(
-        string TestId,
-        Func<RunResult[]?, Task<RunResult>> RunAsync);
-
     public static async Task RunAsync(
         string[] args,
-        IReadOnlyList<TestEntry> tests,
+        IReadOnlyList<TrendRunner.TestEntry> tests,
         string baseDirectory = "reports")
     {
-        var generator = new ReportGenerator(baseDirectory);
+        using var cts = new CancellationTokenSource();
 
-        // Parse --test filter
+        Console.CancelKeyPress += (_, e) =>
+        {
+            e.Cancel = true; // prevent immediate kill, allow graceful shutdown
+            cts.Cancel();
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\nCancellation requested — finishing current test…");
+            Console.ResetColor();
+        };
+
+        AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+        {
+            try
+            {
+                cts.Cancel();
+            }
+            catch (ObjectDisposedException) { }
+        };
+
+        // Parse CLI args
         string? testFilter = null;
+        int maxConcurrency = 1;
         var reportArgs = new List<string>();
 
         for (var i = 0; i < args.Length; i++)
@@ -48,49 +55,60 @@ public static class RunCommand
             {
                 testFilter = args[++i];
             }
+            else if (args[i] is "--concurrency" && i + 1 < args.Length &&
+                     int.TryParse(args[i + 1], out var c) && c > 0)
+            {
+                maxConcurrency = c;
+                i++;
+            }
             else
             {
                 reportArgs.Add(args[i]);
             }
         }
 
-        foreach (var test in tests)
+        var runner = new TrendRunner(baseDirectory);
+
+        runner.TestStarted += testId =>
         {
-            if (testFilter is not null &&
-                !test.TestId.Equals(testFilter, StringComparison.OrdinalIgnoreCase))
-                continue;
-
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"Running trend test: {test.TestId}");
+            Console.WriteLine($"Running trend test: {testId}");
             Console.ResetColor();
+        };
 
-            var existingReport = await generator.GenerateAsync(test.TestId);
-            var history = existingReport?.Runs.ToArray();
-
-            var result = await test.RunAsync(history);
-
-            await SaveRunResultAsync(result, baseDirectory);
+        runner.TestCompleted += result =>
+        {
             PrintRunResult(result);
+        };
+
+        runner.TestFailed += (testId, ex) =>
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"FAILED: {testId} — {ex.Message}");
+            Console.ResetColor();
+        };
+
+        var options = new RunOptions
+        {
+            TestFilter = testFilter,
+            MaxConcurrency = maxConcurrency,
+        };
+
+        try
+        {
+            await runner.RunAsync(tests, options, cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Run cancelled.");
+            Console.ResetColor();
+            return;
         }
 
         // Forward remaining args to ReportCommand
         if (reportArgs.Count > 0)
             await ReportCommand.RunAsync([.. reportArgs], baseDirectory);
-    }
-
-    private static async Task SaveRunResultAsync(RunResult result, string baseDirectory)
-    {
-        var dir = Path.Combine(baseDirectory, result.TestId.Replace('.', Path.DirectorySeparatorChar));
-        Directory.CreateDirectory(dir);
-
-        var filePath = Path.Combine(dir, $"run_{result.RunNumber}.json");
-
-        await using var stream = File.Create(filePath);
-        await JsonSerializer.SerializeAsync(stream, result, JsonOptions);
-
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"Result saved: {filePath}");
-        Console.ResetColor();
     }
 
     private static void PrintRunResult(RunResult result)

@@ -23,8 +23,10 @@ A multi-model trend testing and scoring framework for measuring AI extraction qu
     - [9. Using the Module Registry](#9-using-the-module-registry)
     - [10. Scoring Without a TrendTest](#10-scoring-without-a-trendtest)
 - [Reporting](#reporting)
+    - [Automatic HTML Reports](#automatic-html-reports)
     - [CLI Commands](#cli-commands)
     - [Directory Layout](#directory-layout)
+- [Running via dotnet test](#running-via-dotnet-test)
 - [VS Code Extension](#vs-code-extension)
     - [Installation](#installation)
     - [Sidebar Tree View](#sidebar-tree-view)
@@ -159,9 +161,6 @@ public class ProductConfiguration : ITrendConfiguration<Product>
 ```csharp
 public abstract class TrendTest<TModel, TResponse>
 {
-    // Unique identifier used for folder structure and reports
-    public abstract string TestId { get; }
-
     // Define field scoring rules
     public abstract void Configure(TrendModelBuilder<TModel> builder);
 
@@ -175,6 +174,8 @@ public abstract class TrendTest<TModel, TResponse>
     public async Task<RunResult> RunAsync(RunResult[]? history = null);
 }
 ```
+
+The test is automatically identified by its fully qualified class name (e.g. `Trendsetter.Trends.Trends.Services.ProceduresTrendTest`). There is no need to declare a `TestId` — it is derived from `GetType().FullName`.
 
 `TResponse` can be either:
 
@@ -418,8 +419,6 @@ public class ProceduresTrendTest : TrendTest<Procedure, IReadOnlyList<Procedure>
     public ProceduresTrendTest(IAiService aiService)
         => _aiService = aiService;
 
-    public override string TestId => "services.bedrock.procedures";
-
     public override void Configure(TrendModelBuilder<Procedure> builder)
     {
         new ProcedureConfiguration().Configure(builder);
@@ -493,25 +492,13 @@ foreach (var fs in result.FieldScores)
 
 ## Reporting
 
+### Automatic HTML Reports
+
+`TrendRunner` automatically generates an HTML report (`report.html`) after every test run — whether from `dotnet test`, the console app, or the VS Code extension. No separate step is needed.
+
 ### Saving Run Results
 
-After running a trend test, persist the `RunResult` as JSON:
-
-```csharp
-var result = await test.RunAsync(history);
-
-// Save to reports/{test-id-path}/run_{n}.json
-var dir = Path.Combine("reports", result.TestId.Replace('.', Path.DirectorySeparatorChar));
-Directory.CreateDirectory(dir);
-
-var path = Path.Combine(dir, $"run_{result.RunNumber}.json");
-var options = new JsonSerializerOptions
-{
-    WriteIndented = true,
-    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-};
-await File.WriteAllTextAsync(path, JsonSerializer.Serialize(result, options));
-```
+Run results are automatically saved as JSON by `TrendRunner`. Each run produces a `run_{n}.json` file and regenerates the trend's `report.html`.
 
 ### CLI Commands
 
@@ -560,24 +547,26 @@ A field is flagged as **unstable** when its standard deviation exceeds 0.15.
 
 ### Directory Layout
 
-Run results are stored in a directory tree that mirrors the `TestId`:
+Run results are stored in a directory tree derived from the fully qualified class name:
 
 ```
 reports/
-├── services/
-│   └── bedrock/
-│       ├── procedures/
-│       │   ├── run_0.json
-│       │   ├── run_1.json
-│       │   └── report.html
-│       ├── diagnoses/
-│       │   └── run_0.json
-│       └── patient/
-│           └── run_0.json
+├── Trendsetter/
+│   └── Trends/
+│       └── Trends/
+│           └── Services/
+│               ├── ProceduresTrendTest/
+│               │   ├── run_0.json
+│               │   ├── run_1.json
+│               │   └── report.html      ← auto-generated after each run
+│               ├── DiagnosesTrendTest/
+│               │   └── run_0.json
+│               └── PatientTrendTest/
+│                   └── run_0.json
 └── dashboard.html
 ```
 
-The `TestId` `services.bedrock.procedures` maps to the folder path `services/bedrock/procedures/`.
+The `TestId` (e.g. `Trendsetter.Trends.Trends.Services.ProceduresTrendTest`) maps dots to directory separators.
 
 ### HTML Reports
 
@@ -589,6 +578,62 @@ Both use a dark theme with IBM Plex fonts and Chart.js for data visualization.
 ![Dashboard overview](.assets/dashboard01.png)
 
 ![Dashboard detail view](.assets/dashboard02.png)
+
+---
+
+## Running via dotnet test
+
+Trendsetter includes a **VS Test Platform adapter** (`Trendsetter.TestAdapter`) that lets you run trend tests with `dotnet test` — the same way you run xUnit or NUnit tests.
+
+### Setup
+
+Add a reference to the test adapter in your test project:
+
+```xml
+<ProjectReference Include="path/to/Trendsetter.TestAdapter.csproj" />
+```
+
+The adapter auto-discovers all `TrendTest<,>` subclasses in the assembly. Each test is identified by its fully qualified class name.
+
+### Running
+
+```bash
+# Run all trend tests
+dotnet test path/to/YourTrendProject.csproj
+
+# Run a single test by fully qualified name
+dotnet test path/to/YourTrendProject.csproj --filter "FullyQualifiedName=MyApp.Trends.ProceduresTrendTest"
+
+# Run by display name
+dotnet test path/to/YourTrendProject.csproj --filter "DisplayName=MyApp.Trends.ProceduresTrendTest"
+```
+
+### DI Support
+
+Implement `ITrendTestStartup` to configure dependency injection:
+
+```csharp
+public class TrendTestStartup : ITrendTestStartup
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<IConfiguration>( /* ... */ );
+        services.AddHttpClient<IAiService, AiService>();
+    }
+}
+```
+
+The adapter finds your startup class automatically and uses it to build the DI container.
+
+### Concurrency
+
+`TrendRunner` supports concurrent test execution via `RunOptions.MaxConcurrency`. From the CLI:
+
+```bash
+dotnet run --project examples/Trendsetter.Trends -- --concurrency 4
+```
+
+This runs up to 4 tests in parallel using a semaphore-based throttle.
 
 ---
 
@@ -707,6 +752,7 @@ Define Configuration (ITrendConfiguration)
 | `ScorerFactory`                | Creates scorer instances by mode                             |
 | `ISentenceEncoder`             | Pluggable embedding interface for semantic scoring           |
 | `RunResult`                    | Single test run (timestamp, items, overall score)            |
+| `TrendRunner`                  | Execution engine with sequential/concurrent support          |
 | `ItemResult`                   | Single extracted item (average of field scores)              |
 | `FieldScore`                   | Single field (name, score, mode, expected, actual)           |
 | `FieldTrendStats`              | Per-field statistics (mean, σ, min, max, history, stability) |
@@ -720,25 +766,29 @@ Define Configuration (ITrendConfiguration)
 ```
 Trendsetter.sln
 ├── src/
-│   └── Trendsetter.Engine/           # Core library (zero dependencies)
-│       ├── Builders/                  # TrendModelBuilder, PropertyBuilder
-│       ├── Configuration/             # ScoringConfiguration
-│       ├── Contracts/                 # ITrendConfiguration, TrendTest
-│       ├── Models/                    # RunResult, ItemResult, FieldScore, etc.
-│       ├── Reports/                   # ReportGenerator, HTML writers, CLI
-│       ├── Scorers/                   # IScorer implementations, ModelScorer
-│       └── Module.cs                  # Configuration registry
+│   ├── Trendsetter.Engine/           # Core library (zero dependencies)
+│   │   ├── Builders/                  # TrendModelBuilder, PropertyBuilder
+│   │   ├── Configuration/             # ScoringConfiguration
+│   │   ├── Contracts/                 # ITrendConfiguration, TrendTest
+│   │   ├── Models/                    # RunResult, ItemResult, FieldScore, etc.
+│   │   ├── Reports/                   # ReportGenerator, TrendRunner, HTML writers, CLI
+│   │   ├── Scorers/                   # IScorer implementations, ModelScorer
+│   │   └── Module.cs                  # Configuration registry
+│   │
+│   └── Trendsetter.TestAdapter/       # VS Test Platform adapter for dotnet test
+│       ├── TrendTestDiscoverer.cs     # Discovers TrendTest<,> types in assemblies
+│       └── TrendTestExecutor.cs       # Runs tests via TrendRunner with DI support
 │
-└── examples/
-    ├── Trendsetter.Example/           # ASP.NET Core API with Bedrock integration
-    │   ├── Controllers/               # API endpoints
-    │   ├── Models/                    # Domain models
-    │   └── Services/                  # AI service implementation
-    │
-    └── Trendsetter.Trends/           # Console app running trend tests
-        ├── Configuration/             # ITrendConfiguration implementations
-        ├── Trends/Services/           # TrendTest implementations
-        └── reports/                   # Generated run results and dashboards
+├── examples/
+│   ├── Trendsetter.Example/           # ASP.NET Core API with Bedrock integration
+│   │   ├── Controllers/               # API endpoints
+│   │   ├── Models/                    # Domain models
+│   │   └── Services/                  # AI service implementation
+│   │
+│   └── Trendsetter.Trends/           # Console app running trend tests
+│       ├── Configuration/             # ITrendConfiguration implementations
+│       ├── Trends/Services/           # TrendTest implementations
+│       └── reports/                   # Generated run results and dashboards
 │
 ├── vscode-extension/                  # VS Code extension
 │   ├── src/                           # TypeScript source

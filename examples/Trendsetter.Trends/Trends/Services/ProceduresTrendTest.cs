@@ -15,8 +15,6 @@ public class ProceduresTrendTest : TrendTest<ProcedureModel, IReadOnlyList<Proce
         _aiService = aiService;
     }
 
-    public override string TestId => "services.bedrock.procedures";
-
     public override void Configure(TrendModelBuilder<ProcedureModel> builder)
     {
         new ProcedureConfiguration().Configure(builder);

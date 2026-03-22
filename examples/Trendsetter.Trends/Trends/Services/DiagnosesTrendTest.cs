@@ -15,8 +15,6 @@ public class DiagnosesTrendTest : TrendTest<DiagnosisModel, IReadOnlyList<Diagno
         _aiService = aiService;
     }
 
-    public override string TestId => "services.bedrock.diagnoses";
-
     public override void Configure(TrendModelBuilder<DiagnosisModel> builder)
     {
         new DiagnosisConfiguration().Configure(builder);

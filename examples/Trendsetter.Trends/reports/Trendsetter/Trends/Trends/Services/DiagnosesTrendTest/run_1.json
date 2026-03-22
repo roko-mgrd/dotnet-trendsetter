@@ -1,0 +1,122 @@
+{
+  "test_id": "Trendsetter.Trends.Trends.Services.DiagnosesTrendTest",
+  "run_number": 1,
+  "timestamp": "2026-03-22T20:48:38.5732089+00:00",
+  "score": 1,
+  "items": [
+    {
+      "score": 1,
+      "field_scores": [
+        {
+          "field_name": "Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022M75.110\u0022",
+          "actual": "\u0022M75.110\u0022"
+        },
+        {
+          "field_name": "Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Rotator cuff tear or rupture of right shoulder\u0022",
+          "actual": "\u0022Rotator cuff tear or rupture of right shoulder\u0022"
+        }
+      ]
+    },
+    {
+      "score": 1,
+      "field_scores": [
+        {
+          "field_name": "Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022M75.100\u0022",
+          "actual": "\u0022M75.100\u0022"
+        },
+        {
+          "field_name": "Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Rotator cuff syndrome of right shoulder\u0022",
+          "actual": "\u0022Rotator cuff syndrome of right shoulder\u0022"
+        }
+      ]
+    },
+    {
+      "score": 1,
+      "field_scores": [
+        {
+          "field_name": "Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022Z96.611\u0022",
+          "actual": "\u0022Z96.611\u0022"
+        },
+        {
+          "field_name": "Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Presence of right artificial shoulder joint\u0022",
+          "actual": "\u0022Presence of right artificial shoulder joint\u0022"
+        }
+      ]
+    },
+    {
+      "score": 1,
+      "field_scores": [
+        {
+          "field_name": "Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022M25.511\u0022",
+          "actual": "\u0022M25.511\u0022"
+        },
+        {
+          "field_name": "Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Pain in right shoulder\u0022",
+          "actual": "\u0022Pain in right shoulder\u0022"
+        }
+      ]
+    },
+    {
+      "score": 1,
+      "field_scores": [
+        {
+          "field_name": "Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022E11.9\u0022",
+          "actual": "\u0022E11.9\u0022"
+        },
+        {
+          "field_name": "Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Type 2 diabetes mellitus without complications\u0022",
+          "actual": "\u0022Type 2 diabetes mellitus without complications\u0022"
+        }
+      ]
+    },
+    {
+      "score": 1,
+      "field_scores": [
+        {
+          "field_name": "Code",
+          "score": 1,
+          "mode": 0,
+          "expected": "\u0022I10\u0022",
+          "actual": "\u0022I10\u0022"
+        },
+        {
+          "field_name": "Description",
+          "score": 1,
+          "mode": 2,
+          "expected": "\u0022Essential hypertension\u0022",
+          "actual": "\u0022Essential hypertension\u0022"
+        }
+      ]
+    }
+  ]
+}

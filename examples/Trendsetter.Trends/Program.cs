@@ -50,7 +50,7 @@ await using var sp = services.BuildServiceProvider();
 var projectDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
 var baseDirectory = Path.Combine(projectDir, "reports");
 
-var tests = new RunCommand.TestEntry[]
+var tests = new TrendRunner.TestEntry[]
 {
     Wrap(sp.GetRequiredService<ProceduresTrendTest>()),
     Wrap(sp.GetRequiredService<DiagnosesTrendTest>()),
@@ -62,5 +62,5 @@ await RunCommand.RunAsync(args, tests, baseDirectory);
 
 return;
 
-static RunCommand.TestEntry Wrap<TModel, TResponse>(TrendTest<TModel, TResponse> test)
-    => new(test.TestId, history => test.RunAsync(history));
+static TrendRunner.TestEntry Wrap<TModel, TResponse>(TrendTest<TModel, TResponse> test)
+    => new(test.GetType().FullName!, test.GetType(), history => test.RunAsync(history));

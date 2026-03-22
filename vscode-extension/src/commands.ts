@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 import { TrendTreeProvider, TrendNode, RunNode } from "./trendTreeProvider";
+import { TrendInfo } from "./types";
 
 export function registerCommands(context: vscode.ExtensionContext, treeProvider: TrendTreeProvider): void {
     /** Map from testId (or "__all__") to the running task execution. */
@@ -20,12 +21,15 @@ export function registerCommands(context: vscode.ExtensionContext, treeProvider:
         return undefined;
     }
 
-    /** Run a dotnet command as a VS Code task and return the execution handle. */
-    async function runDotnet(label: string, projectPath: string, args: string): Promise<vscode.TaskExecution> {
-        const cmd = `dotnet run --project "${projectPath}"${args ? ` ${args}` : ""}`;
+    /** Run a shell command as a VS Code task and return the execution handle. */
+    async function runTask(label: string, cmd: string): Promise<vscode.TaskExecution> {
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+        if (!workspaceFolder) {
+            throw new Error("No workspace folder is open.");
+        }
         const task = new vscode.Task(
             { type: "trendsetter" },
-            vscode.TaskScope.Workspace,
+            workspaceFolder,
             label,
             "Trendsetter",
             new vscode.ShellExecution(cmd),
@@ -70,7 +74,7 @@ export function registerCommands(context: vscode.ExtensionContext, treeProvider:
                 vscode.window.showWarningMessage("No project referencing Trendsetter.Engine found in the workspace.");
                 return;
             }
-            const execution = await runDotnet("Run All Tests", projectPath, "");
+            const execution = await runTask("Run All Tests", `dotnet test "${projectPath}"`);
 
             runningTasks.set(ALL_KEY, execution);
             for (const trend of treeProvider.getTrends()) {
@@ -83,8 +87,8 @@ export function registerCommands(context: vscode.ExtensionContext, treeProvider:
     // ── Run Single Test ───────────────────────────────────────────
     context.subscriptions.push(
         vscode.commands.registerCommand("trendsetter.runTest", async (node?: TrendNode) => {
-            const testId = node?.trend.testId ?? (await pickTestId(treeProvider));
-            if (!testId) {
+            const trend = node?.trend ?? (await pickTrend(treeProvider));
+            if (!trend) {
                 return;
             }
             const projectPath = await findProjectPath();
@@ -92,10 +96,14 @@ export function registerCommands(context: vscode.ExtensionContext, treeProvider:
                 vscode.window.showWarningMessage("No project referencing Trendsetter.Engine found in the workspace.");
                 return;
             }
-            const execution = await runDotnet(`Run ${testId}`, projectPath, `-- --test ${testId}`);
+            const filterExpr = `FullyQualifiedName=${trend.testId}`;
+            const execution = await runTask(
+                `Run ${trend.testId}`,
+                `dotnet test "${projectPath}" --filter "${filterExpr}"`,
+            );
 
-            runningTasks.set(testId, execution);
-            treeProvider.setRunning(testId, true);
+            runningTasks.set(trend.testId, execution);
+            treeProvider.setRunning(trend.testId, true);
             vscode.commands.executeCommand("setContext", "trendsetter.anyRunning", true);
         }),
     );
@@ -131,9 +139,8 @@ export function registerCommands(context: vscode.ExtensionContext, treeProvider:
                 vscode.window.showWarningMessage("No project referencing Trendsetter.Engine found in the workspace.");
                 return;
             }
-            const terminal = vscode.window.createTerminal("Trendsetter Dashboard");
-            terminal.show();
-            terminal.sendText(`dotnet run --project "${projectPath}" -- dashboard`);
+            const execution = await runTask("Generate Dashboard", `dotnet run --project "${projectPath}" -- dashboard`);
+            // Fire-and-forget — no need to track.
         }),
     );
 
@@ -160,36 +167,31 @@ export function registerCommands(context: vscode.ExtensionContext, treeProvider:
     // ── Generate Report (for a specific trend) ────────────────────
     context.subscriptions.push(
         vscode.commands.registerCommand("trendsetter.generateReport", async (node?: TrendNode) => {
-            const testId = node?.trend.testId ?? (await pickTestId(treeProvider));
-            if (!testId) {
+            const trend = node?.trend ?? (await pickTrend(treeProvider));
+            if (!trend) {
                 return;
             }
+            const testId = trend.testId;
 
             const projectPath = await findProjectPath();
             if (!projectPath) {
                 vscode.window.showWarningMessage("No project referencing Trendsetter.Engine found in the workspace.");
                 return;
             }
-            const terminal = vscode.window.createTerminal("Trendsetter Report");
-            terminal.show();
-            terminal.sendText(`dotnet run --project "${projectPath}" -- ${testId} --html`);
+            const execution = await runTask(
+                `Generate Report — ${testId}`,
+                `dotnet run --project "${projectPath}" -- ${testId} --html`,
+            );
+            // Fire-and-forget — no need to track.
         }),
     );
 
     // ── Open Report in browser (inline button) ─────────────────────
     context.subscriptions.push(
         vscode.commands.registerCommand("trendsetter.openReport", async (node?: TrendNode) => {
-            const trend = node?.trend;
+            const trend = node?.trend ?? (await pickTrend(treeProvider));
             if (!trend) {
-                const testId = await pickTestId(treeProvider);
-                if (!testId) {
-                    return;
-                }
-                const found = treeProvider.getTrends().find((t) => t.testId === testId);
-                if (!found) {
-                    return;
-                }
-                return openReportInBrowser(found);
+                return;
             }
             return openReportInBrowser(trend);
         }),
@@ -203,16 +205,15 @@ export function registerCommands(context: vscode.ExtensionContext, treeProvider:
     );
 }
 
-async function pickTestId(provider: TrendTreeProvider): Promise<string | undefined> {
+async function pickTrend(provider: TrendTreeProvider): Promise<TrendInfo | undefined> {
     const trends = provider.getTrends();
     if (trends.length === 0) {
         vscode.window.showInformationMessage("No trend tests found.");
         return undefined;
     }
-    return vscode.window.showQuickPick(
-        trends.map((t) => t.testId),
-        { placeHolder: "Select a trend test" },
-    );
+    const items = trends.map((t) => ({ label: t.testId, trend: t }));
+    const picked = await vscode.window.showQuickPick(items, { placeHolder: "Select a trend test" });
+    return picked?.trend;
 }
 
 function openReportInBrowser(trend: { directory: string; testId: string; hasReport: boolean }): void {

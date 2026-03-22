@@ -11,8 +11,6 @@ using Trendsetter.Engine.Scorers;
 /// </summary>
 public abstract class TrendTest<TModel, TResponse>
 {
-    public abstract string TestId { get; }
-
     /// <summary>
     /// Called once to configure field-level scoring for TModel.
     /// </summary>
@@ -74,7 +72,7 @@ public abstract class TrendTest<TModel, TResponse>
 
         return new RunResult
         {
-            TestId = TestId,
+            TestId = GetType().FullName ?? GetType().Name,
             RunNumber = runNumber,
             Timestamp = DateTimeOffset.UtcNow,
             Items = itemResults

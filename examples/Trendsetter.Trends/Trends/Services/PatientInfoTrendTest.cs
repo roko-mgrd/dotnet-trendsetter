@@ -15,8 +15,6 @@ public class PatientInfoTrendTest : TrendTest<PatientInfoModel, PatientInfoModel
         _aiService = aiService;
     }
 
-    public override string TestId => "services.bedrock.patient-info";
-
     public override void Configure(TrendModelBuilder<PatientInfoModel> builder)
     {
         new PatientInfoConfiguration().Configure(builder);
